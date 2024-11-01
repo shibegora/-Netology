@@ -108,9 +108,55 @@ docker exec -it eg_custom-nginx-t2 bash
 В случае attach, мы цепляемся как бы к сущности самого конейнера на уровень выше, и при выполнении команды cntrl+c мы останавливаем сам процесс, который идет постоянно для выполнения работы самого контейнера.
 Если провести аналогию: exec - подключаемся к ОС, attach - подключаемся к БИОС (если такое сравнение конечно допустимо). 
 
-Зайдите в интерактивный терминал контейнера "custom-nginx-t2" с оболочкой bash.
+5. Зайдите в интерактивный терминал контейнера "custom-nginx-t2" с оболочкой bash.
 6. Установите любимый текстовый редактор(vim, nano итд) с помощью apt-get.
 ```
 apt-get update && apt-get install -y vim
 vim /etc/nginx/conf.d/default.conf
 ```
+
+7. Отредактируйте файл "/etc/nginx/conf.d/default.conf", заменив порт "listen 80" на "listen 81".
+8. Запомните(!) и выполните команду ```nginx -s reload```, а затем внутри контейнера ```curl http://127.0.0.1:80 ; curl http://127.0.0.1:81```.
+```
+root@b9ac18555e38:/usr/share/nginx/html# nginx -s reload
+2024/11/01 11:13:11 [notice] 2025#2025: signal process started
+root@b9ac18555e38:/usr/share/nginx/html# `curl http://127.0.0.1:80
+>
+>
+> ^C
+root@b9ac18555e38:/usr/share/nginx/html# `curl http://127.0.0.1:81
+> ^C
+root@b9ac18555e38:/usr/share/nginx/html#
+root@b9ac18555e38:/usr/share/nginx/html# curl http://127.0.0.1:80
+curl: (7) Failed to connect to 127.0.0.1 port 80: Connection refused
+root@b9ac18555e38:/usr/share/nginx/html# curl http://127.0.0.1:81
+<!-- index.html -->
+<html>
+<head>
+Hey, Netology
+</head>
+<body>
+<h1>I will be DevOps Engineer!</h1>
+</body>
+```
+
+10. Проверьте вывод команд: ```ss -tlpn | grep 127.0.0.1:8080``` , ```docker port custom-nginx-t2```, ```curl http://127.0.0.1:8080```. Кратко объясните суть возникшей проблемы.
+```
+netstat -ano | findstr "127.0.0.1:8080"
+  TCP    127.0.0.1:8080         0.0.0.0:0              LISTENING       26024
+docker port eg_custom-nginx-t2
+80/tcp -> 127.0.0.1:8080
+curl http://127.0.0.1:8080
+Базовое соединение закрыто: Соединение было неожиданно закрыто.
+```
+По умолчанию http трафик идет по 80 порту. Мы изменили порт, который читает контейнер на 81, который по умолчанию закрыт.
+Для того что бы обратиться по 81 порту к контейнеру, нужно запустит ьпринудительное использование данного порта на нашем пк при обращении к контейнеру. 
+Командой ``` docker run -d -p 81:80 --name eg_custom-nginx-t2 ``` мы делаем натирование портов, что при обращении к 81 порту нас переводило на 80ый, таким образом "прикрывая" настоящий используемый порт контейнера. 
+Для решения данной задачи воспользовался данной инструкцией: https://ru.hexlet.io/blog/posts/mapping-docker#kak-naznachit-mapping-rabotayuschemu-docker-konteyner
+Т.К. контейнер нельзя удалять и прописать маппинг портов по новой при запуске RUN, изменяем конфигурацию конфиг файла существующего контейнера:
+- ```docker inspect --format="{{.Id}}" eg_custom-nginx-t2 ``` - получаем 64 значный id контейнера
+- ``` systemctl stop docker ``` - останавливаем службу docker на время проведения изменения конфигурации.
+Т.К. на винде невозможно найти файл по id, я воспользовался docker desktop и
+
+
+## Задача 4
