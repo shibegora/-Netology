@@ -17,3 +17,5 @@ Success! The configuration is valid.
 Использование числа "1nginx" в имени ресурса недопустимо. Имена должны начинаться с буквы и могут включать буквы, цифры, подчеркивания или тире.
 Переменная random_password.random_string_FAKE.resulT написана не корреткно, мы не задавали имя random_string_FAKE в resource "random_password", а так-же в переменной resulT допущена синтаксическая ошибка.
 resource "docker_container" не сможет найти image, который мы указали ему в качесте переменных из resource "docker_image", ведь мы его не раскомментировали (он выше 29 строки). Плюсом ко всему в resource "docker_image" следует указать имя, которое мы указали в качестве переменной в resource "docker_container"
+
+Ссылка на исправленный код: https://github.com/shibegora/-Netology/blob/main/terraform_netology/main.tf
