@@ -149,3 +149,9 @@ variable "storage_vm_name" {
   default     = "storage"
   description = "Name of Storage VM"
 }
+
+variable "disk_count" {
+  type    = number
+  default = 3
+  description = "Number of HDD disks to create"
+}
