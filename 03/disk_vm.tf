@@ -24,9 +24,9 @@ resource "yandex_compute_instance" "storage" {
     }
   }
   dynamic "secondary_disk" {
-    for_each        = yandex_compute_disk.hdd[*].id
+    for_each = yandex_compute_disk.hdd
     content {
-      disk_id       = secondary_disk.value
+      disk_id = secondary_disk.value.id
     }
   }
   scheduling_policy {
